@@ -67,20 +67,14 @@ async def _(
                                          ProtocolAdapter.MS.text(f"群组/频道请求过于频繁：请{round(left_time, 2)}秒后再试"))
 
     voices_list = []
+    total_voices_list = []
     for each_data in voices_data["data"]:
         if len(voice_conditions) >= 1 and each_data["prefix_name"] != voice_conditions[0]:
             continue
+        # 把这个下面的语音全都拿出来，然后规则放成map，符合所有规则的才留下
         for user_voice_data in each_data["voice_data"]:
-            if len(voice_conditions) >= 2 and voice_conditions[1] not in user_voice_data["name"]:
-                # user不在列表里
-                continue
             # 展开每个语音
             for each_voice in user_voice_data["voices"]:
-                # 检查每一个规则
-                voice_name = voice_conditions[2] if len(voice_conditions) >= 3 else ""
-                if len(voice_name) != 0 and re.match(f"^{each_voice['voice_name']}$", voice_name) is None:
-                    # name正则匹配失败
-                    continue
                 if each_voice.get("white_list") is not None:
                     if len(list(filter(
                             lambda x: (x.get("type", "") == msg_type and x.get("type_id", 0) == msg_type_id),
@@ -93,7 +87,35 @@ async def _(
                             each_voice["black_list"]))) != 0:
                         # 有黑名单且符合规则
                         continue
-                voices_list.append(each_voice)
+                # 规则放进来
+                total_voices_list.append({
+                    "rules": [user_voice_data["name"], each_voice['voice_name']],
+                    "voice": each_voice,
+                })
+
+    for i in range(len(total_voices_list)):
+        is_valid = True
+        # 判断所有规则
+        # 数组则判断是否conditions都存在，字符串则判断conditions是否可以正则匹配
+        if len(voice_conditions) > 1:
+            # voice_conditions长度是1表示只有一个命令，那就全部视为有效
+            cur_condition_valid = False
+            for rule in total_voices_list[i]["rules"]:
+                for condition_index in range(1, len(voice_conditions)):
+                    if type(rule) == list and voice_conditions[condition_index] in rule:
+                        cur_condition_valid = True
+                        break
+                    if type(rule) == str and re.match(f"^{rule}$", voice_conditions[condition_index]) is not None:
+                        cur_condition_valid = True
+                        break
+                if cur_condition_valid:
+                    break
+            # 这条规则在所有rule中都没通过
+            if not cur_condition_valid:
+                is_valid = False
+        if is_valid:
+            voices_list.append(total_voices_list[i]["voice"])
+
     if len(voices_list) == 0:
         await query_voice.finish(ProtocolAdapter.MS.reply(event) +
                                  ProtocolAdapter.MS.text("未找到对应音频！"))
