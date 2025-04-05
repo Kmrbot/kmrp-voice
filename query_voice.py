@@ -98,21 +98,19 @@ async def _(
         # 判断所有规则
         # 数组则判断是否conditions都存在，字符串则判断conditions是否可以正则匹配
         if len(voice_conditions) > 1:
-            # voice_conditions长度是1表示只有一个命令，那就全部视为有效
-            cur_condition_valid = False
-            for rule in total_voices_list[i]["rules"]:
-                for condition_index in range(1, len(voice_conditions)):
+            for condition_index in range(1, len(voice_conditions)):
+                cur_condition_valid = False
+                for rule in total_voices_list[i]["rules"]:
                     if type(rule) == list and voice_conditions[condition_index] in rule:
                         cur_condition_valid = True
                         break
                     if type(rule) == str and re.match(f"^{rule}$", voice_conditions[condition_index]) is not None:
                         cur_condition_valid = True
                         break
-                if cur_condition_valid:
+                # 这条规则在所有rule中都没通过
+                if not cur_condition_valid:
+                    is_valid = False
                     break
-            # 这条规则在所有rule中都没通过
-            if not cur_condition_valid:
-                is_valid = False
         if is_valid:
             voices_list.append(total_voices_list[i]["voice"])
 
