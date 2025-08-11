@@ -103,26 +103,27 @@ class VoiceListPainter:
     def __paint_syntax(cls, pic: PicGenerator, prefix_name: str):
         pic.set_pos(VoiceListBorder.BORDER_SYNTAX_TITLE_L, pic.y + VoiceListBorder.BORDER_SYNTAX_TITLE_U)
 
-        pic.paint_auto_line_text(pic.x, "语法：\n", VoiceListFont.title_font(), Color.BLACK)
+        pic.paint_auto_line_text(pic.x,
+                                 [PicGenerator.AutoLineTextData(text="语法：\n", color=Color.BLACK)],
+                                 VoiceListFont.title_font())
         pic.set_pos(VoiceListBorder.BORDER_SYNTAX_EXPLAIN_L, pic.y)
-        pic.paint_auto_line_text(pic.x, f"{prefix_name} [UserName] [VoiceName]\n",
-                                 VoiceListFont.explain_font(), Color.BLACK)
-        pic.paint_auto_line_text(pic.x, "UserName: 用户名（多个均可触发）\n", VoiceListFont.explain_font(),
-                                 Color.BLACK)
-        pic.paint_auto_line_text(pic.x, "VoiceName: 音频名（部分有模糊匹配）\n", VoiceListFont.explain_font(),
-                                 Color.BLACK)
-        pic.paint_auto_line_text(pic.x, "用户名和音频名均可以省略，"
-                                        "省略时则随机返回一个音频内容。\n", VoiceListFont.explain_font(), Color.RED)
-        pic.paint_auto_line_text(pic.x, "私密音频仅可在当前群组/私聊内生效。"
-                                        "该种音频会以", VoiceListFont.explain_font(), Color.RED)
-        pic.paint_auto_line_text(pic.x, "紫色", VoiceListFont.explain_font(), Color.FUCHSIA)
-        pic.paint_auto_line_text(pic.x, "列出。\n", VoiceListFont.explain_font(), Color.RED)
+        pic.paint_auto_line_text(pic.x,
+                                 [PicGenerator.AutoLineTextData(text=f"{prefix_name} [UserName] [VoiceName]\n", color=Color.BLACK),
+                                  PicGenerator.AutoLineTextData(text="UserName: 用户名（多个均可触发）\n", color=Color.BLACK),
+                                  PicGenerator.AutoLineTextData(text="VoiceName: 音频名（部分有模糊匹配）\n", color=Color.BLACK),
+                                  PicGenerator.AutoLineTextData(text="用户名和音频名均可以省略，省略时则随机返回一个音频内容。\n", color=Color.RED),
+                                  PicGenerator.AutoLineTextData(text="私密音频仅可在当前群组/私聊内生效。该种音频会以", color=Color.RED),
+                                  PicGenerator.AutoLineTextData(text="紫色", color=Color.FUCHSIA),
+                                  PicGenerator.AutoLineTextData(text="列出。\n", color=Color.RED)],
+                                 VoiceListFont.explain_font())
         return pic
 
     @classmethod
     def __paint_voice_data(cls, pic: PicGenerator, voice_data, event_type, type_id):
         pic.set_pos(VoiceListBorder.BORDER_SYNTAX_TITLE_L, pic.y + VoiceListBorder.BORDER_NAME_LIST_TITLE_U)
-        pic.paint_auto_line_text(pic.x, "命令内容：\n", VoiceListFont.title_font(), Color.BLACK)
+        pic.paint_auto_line_text(pic.x,
+                                 [PicGenerator.AutoLineTextData(text="命令内容：\n", color=Color.BLACK)],
+                                 VoiceListFont.title_font())
         if len(voice_data) == 0:
             return pic
 
@@ -164,13 +165,14 @@ class VoiceListPainter:
                     offset_index < (len(VoiceListBorder.BORDER_NAME_LIST_SUB_TITLE_L) - 1) else pic.width
                 pic.paint_auto_line_text(
                     start_x,
-                    cur_name[0] + "\n", VoiceListFont.sub_title_font(), Color.RED,
+                    [PicGenerator.AutoLineTextData(text=cur_name[0] + "\n", color=Color.RED)],
+                    VoiceListFont.sub_title_font(),
                     right_limit=right_limit,
                     row_length=int(pic.row_space / 2))
                 pic.paint_auto_line_text(
                     start_x,
-                    "[" + array_to_string(cur_name) + "]\n", VoiceListFont.each_name_extra_font(),
-                    Color.RED,
+                    [PicGenerator.AutoLineTextData(text="[" + array_to_string(cur_name) + "]\n", color=Color.RED)],
+                    VoiceListFont.each_name_extra_font(),
                     right_limit=right_limit,
                     row_length=int(pic.row_space / 2))
                 paint_count += 1.3
@@ -191,9 +193,11 @@ class VoiceListPainter:
                     pic.set_pos(VoiceListBorder.BORDER_NAME_LIST_SUB_TITLE_L[offset_index] +
                                 VoiceListBorder.BORDER_NAME_LIST_CONTENT_EXTRA_L,
                                 pic.y)
-                    pic.paint_auto_line_text(pic.x, f"·{each_voice['show_name']}\n", VoiceListFont.explain_font(),
-                                             voice_name_color,
-                                             row_length=int(pic.row_space / 2))
+                    pic.paint_auto_line_text(
+                        pic.x,
+                        [PicGenerator.AutoLineTextData(text=f"·{each_voice['show_name']}\n", color=voice_name_color)],
+                        VoiceListFont.explain_font(),
+                        row_length=int(pic.row_space / 2))
                     # 记录最大y高度
                     if max_y < pic.y:
                         max_y = pic.y
